@@ -13,7 +13,8 @@
 | `id` | `int` | Первичный ключ. |
 | `login` | `string` | Уникальный логин. |
 | `password_hash` | `string` | Хеш пароля. |
-| `name` | `string` | Имя пользователя. |
+| `first_name` | `string` | Имя пользователя. |
+| `last_name` | `string` | Фамилия пользователя. |
 | `role` | `ENUM` | Роль пользователя. |
 
 ### `masters`
