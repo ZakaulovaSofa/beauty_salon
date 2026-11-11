@@ -1,0 +1,25 @@
+services:
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: beauty_salon
+      MYSQL_USER: salon_user
+      MYSQL_PASSWORD: salon_password
+    ports:
+      - "127.0.0.1:3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./schema.sql:/docker-entrypoint-initdb.d/init.sql:ro
+
+  phpmyadmin:
+    image: phpmyadmin:5.2
+    environment:
+      PMA_HOST: mysql
+    ports:
+      - "127.0.0.1:8081:80"
+    depends_on:
+      - mysql
+
+volumes:
+  mysql_data:
