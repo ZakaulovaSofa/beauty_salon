@@ -17,6 +17,7 @@ import {
   ApiOkResponse,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { Public } from './decorators/access.decorators.js';
 
 import { AuthService } from './auth.service.js';
 import { AccessTokenDto } from './dto/access-token.dto.js';
@@ -29,6 +30,7 @@ export class AuthController {
   constructor(private readonly auth: AuthService) {}
 
   @Post('register')
+  @Public()
   @ApiOperation({ summary: 'Зарегистрировать клиента' })
   @ApiBody({ type: RegisterDto })
   @ApiCreatedResponse({ description: 'Клиент создан', type: AccessTokenDto })
@@ -46,6 +48,7 @@ export class AuthController {
   }
 
   @Post('login')
+  @Public()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Войти в систему' })
   @ApiBody({ type: LoginDto })
