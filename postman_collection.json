@@ -1,0 +1,345 @@
+{
+  "info": {
+    "_postman_id": "4df8c884-f66e-46ca-bdbc-4d41b8b7515b",
+    "name": "Look&Lock",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "58885663",
+    "_collection_link": "https://go.postman.co/collection/58885663-4df8c884-f66e-46ca-bdbc-4d41b8b7515b?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Аутентификация",
+      "item": [
+        {
+          "name": "Зарегистрировать клиента",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set(\"new_login\", `anna_${pm.variables.replaceIn(\"{{$guid}}\")}`);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Создан аккаунт — 201\", () => {\n  pm.response.to.have.status(201);\n});\n\npm.test(\"Ответ содержит только access_token в формате JWT\", () => {\n  const body = pm.response.json();\n\n  pm.expect(body).to.have.all.keys(\"access_token\");\n  pm.expect(body.access_token).to.match(\n    /^[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+$/,\n  );\n});\n\nif (pm.response.code === 201) {\n  pm.collectionVariables.set(\"registered_login\", pm.variables.get(\"new_login\"));\n}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"first_name\": \"Анна\",\n  \"last_name\": \"Иванова\",\n  \"login\": \"{{new_login}}\",\n  \"password\": \"ExamplePassword123!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Войти в систему (клиент)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Вход успешен, ответ содержит JWT\", () => {\n  pm.response.to.have.status(200);\n\n  const body = pm.response.json();\n  pm.expect(body).to.have.all.keys(\"access_token\");\n  pm.expect(body.access_token).to.be.a(\"string\").and.match(\n    /^[\\w-]+\\.[\\w-]+\\.[\\w-]+$/\n  );\n\n  pm.collectionVariables.set(\"client_token\", body.access_token);\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"login\": \"{{registered_login}}\",\n  \"password\": \"ExamplePassword123!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Войти в систему (админ)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Вход администратора успешен, токен сохранён\", () => {\n  pm.response.to.have.status(200);\n\n  const { access_token } = pm.response.json();\n  pm.expect(access_token).to.be.a(\"string\").and.match(\n    /^[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+$/\n  );\n\n  pm.collectionVariables.set(\"admin_token\", access_token);\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"login\": \"admin\",\n  \"password\": \"admin123!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Войти в систему (мастер)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Вход успешен, ответ содержит JWT\", () => {\n  pm.response.to.have.status(200);\n\n  const body = pm.response.json();\n  pm.expect(body).to.have.all.keys(\"access_token\");\n  pm.expect(body.access_token).to.be.a(\"string\").and.match(\n    /^[\\w-]+\\.[\\w-]+\\.[\\w-]+$/\n  );\n\n  pm.collectionVariables.set(\"master_token\", body.access_token);\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"login\": \"master\",\n  \"password\": \"master123!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Пользователи",
+      "item": [
+        {
+          "name": "Получить список пользователей",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"200: до двух клиентов, отсортированных по id\", () => {\n  pm.response.to.have.status(200);\n\n  const users = pm.response.json();\n  pm.expect(users).to.be.an(\"array\");\n  pm.expect(users.length).to.be.within(1, 2);\n\n  users.forEach((user, index) => {\n    pm.expect(user).to.have.all.keys(\"id\", \"login\", \"first_name\", \"last_name\", \"role\");\n    pm.expect(Number.isInteger(user.id) && user.id > 0).to.be.true;\n    pm.expect(user.role).to.equal(\"client\");\n\n    if (index > 0) {\n      pm.expect(user.id).to.be.greaterThan(users[index - 1].id);\n    }\n  });\n\n  pm.collectionVariables.set(\"user_id\", String(users[0].id));\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users?role=client",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "role",
+                  "value": "client"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Получить пользователя по id",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"200: получен запрошенный пользователь\", () => {\n  pm.response.to.have.status(200);\n\n  const user = pm.response.json();\n  pm.expect(user).to.have.all.keys(\n    \"id\", \"login\", \"first_name\", \"last_name\", \"role\"\n  );\n  pm.expect(user.id).to.equal(Number(pm.variables.get(\"user_id\")));\n  pm.expect(user.role).to.be.oneOf([\"client\", \"master\", \"admin\"]);\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/{{user_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{user_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Изменить роль пользователя",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"200: роль запрошенного пользователя установлена\", () => {\n  pm.response.to.have.status(200);\n\n  const user = pm.response.json();\n  pm.expect(user).to.have.all.keys(\n    \"id\", \"login\", \"first_name\", \"last_name\", \"role\"\n  );\n  pm.expect(user.id).to.equal(Number(pm.variables.get(\"user_id\")));\n  pm.expect(user.role).to.equal(\"master\");\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"role\": \"master\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/{{user_id}}/role",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{user_id}}",
+                "role"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": ""
+    },
+    {
+      "key": "registered_login",
+      "value": ""
+    },
+    {
+      "key": "client_token",
+      "secret": true
+    },
+    {
+      "key": "admin_token",
+      "secret": true
+    },
+    {
+      "key": "user_id",
+      "value": ""
+    },
+    {
+      "key": "master_token",
+      "value": ""
+    }
+  ]
+}
