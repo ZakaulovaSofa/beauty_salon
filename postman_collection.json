@@ -1,10 +1,10 @@
 {
   "info": {
-    "_postman_id": "4df8c884-f66e-46ca-bdbc-4d41b8b7515b",
+    "_postman_id": "19431556-c061-4fc6-a6ab-bf03d61c4871",
     "name": "Look&Lock",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "_exporter_id": "58885663",
-    "_collection_link": "https://go.postman.co/collection/58885663-4df8c884-f66e-46ca-bdbc-4d41b8b7515b?source=collection_link"
+    "_exporter_id": "60187168",
+    "_collection_link": "https://go.postman.co/collection/60187168-19431556-c061-4fc6-a6ab-bf03d61c4871?source=collection_link"
   },
   "item": [
     {
@@ -314,6 +314,400 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "Услуги",
+      "item": [
+        {
+          "name": "Получить список услуг",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "\r\npm.test(\"Статус ответа — 200\", () => {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Ответ содержит массив услуг\", () => {\r\n    const services = pm.response.json();\r\n\r\n    pm.expect(services).to.be.an(\"array\");\r\n});\r\n\r\npm.test(\"Услуги соответствуют структуре API\", () => {\r\n    const services = pm.response.json();\r\n\r\n    services.forEach((service) => {\r\n        pm.expect(service).to.have.all.keys(\r\n            \"id\",\r\n            \"name\",\r\n            \"description\",\r\n            \"price\",\r\n            \"duration_minutes\",\r\n            \"status\"\r\n        );\r\n\r\n        pm.expect(service.id).to.be.a(\"number\");\r\n        pm.expect(service.name).to.be.a(\"string\");\r\n        pm.expect(service.price).to.be.a(\"number\");\r\n        pm.expect(service.duration_minutes).to.be.a(\"number\");\r\n        pm.expect(service.status).to.equal(\"active\");\r\n\r\n        pm.expect(service.price).to.be.at.least(0);\r\n        pm.expect(service.duration_minutes).to.be.above(0);\r\n    });\r\n});\r\n\r\npm.test(\"Услуги отсортированы по возрастанию ID\", () => {\r\n    const services = pm.response.json();\r\n\r\n    for (let i = 1; i < services.length; i++) {\r\n        pm.expect(services[i].id)\r\n            .to.be.greaterThan(services[i - 1].id);\r\n    }\r\n});\r\n\r\nconst servicesForVariable = pm.response.json();\r\n\r\nif (servicesForVariable.length > 0) {\r\n    pm.collectionVariables.set(\r\n        \"service_id\",\r\n        String(servicesForVariable[0].id)\r\n    );\r\n} else {\r\n    pm.collectionVariables.unset(\"service_id\");\r\n}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/services",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "services"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Получить карточку услуги",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "\r\npm.test(\"Статус ответа — 200\", () => {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Ответ содержит объект услуги\", () => {\r\n    const service = pm.response.json();\r\n\r\n    pm.expect(service).to.be.an(\"object\");\r\n    pm.expect(service).not.to.be.an(\"array\");\r\n});\r\n\r\npm.test(\"Карточка соответствует структуре API\", () => {\r\n    const service = pm.response.json();\r\n\r\n    pm.expect(service).to.have.all.keys(\r\n        \"id\",\r\n        \"name\",\r\n        \"description\",\r\n        \"price\",\r\n        \"duration_minutes\",\r\n        \"status\"\r\n    );\r\n\r\n    pm.expect(service.id).to.equal(\r\n        Number(pm.collectionVariables.get(\"service_id\"))\r\n    );\r\n\r\n    pm.expect(service.name).to.be.a(\"string\");\r\n\r\n    pm.expect(\r\n        service.description === null ||\r\n        typeof service.description === \"string\"\r\n    ).to.be.true;\r\n\r\n    pm.expect(service.price).to.be.a(\"number\");\r\n    pm.expect(service.duration_minutes).to.be.a(\"number\");\r\n    pm.expect(service.status).to.equal(\"active\");\r\n});\r\n\r\npm.test(\"Цена и длительность корректны\", () => {\r\n    const service = pm.response.json();\r\n\r\n    pm.expect(service.price).to.be.at.least(0);\r\n    pm.expect(service.duration_minutes).to.be.above(0);\r\n});\r\n"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/services/{{service_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "services",
+                "{{service_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Создать услугу",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "\r\npm.test(\"Статус ответа — 201\", () => {\r\n    pm.response.to.have.status(201);\r\n});\r\n\r\npm.test(\"Услуга успешно создана\", () => {\r\n    const service = pm.response.json();\r\n\r\n    pm.expect(service).to.have.all.keys(\r\n        \"id\",\r\n        \"name\",\r\n        \"description\",\r\n        \"price\",\r\n        \"duration_minutes\",\r\n        \"status\"\r\n    );\r\n\r\n    pm.expect(service.name).to.equal(\"Тестовая услуга Postman\");\r\n    pm.expect(service.description).to.equal(\r\n        \"Проверка создания услуги через Postman\"\r\n    );\r\n    pm.expect(service.price).to.equal(1700);\r\n    pm.expect(service.duration_minutes).to.equal(60);\r\n    pm.expect(service.status).to.equal(\"active\");\r\n});\r\n\r\npm.test(\"ID новой услуги является положительным числом\", () => {\r\n    const service = pm.response.json();\r\n\r\n    pm.expect(service.id).to.be.a(\"number\");\r\n    pm.expect(service.id).to.be.above(0);\r\n\r\n    pm.collectionVariables.set(\"service_id\", String(service.id));\r\n});\r\n"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\": \"Тестовая услуга Postman\",\r\n    \"description\": \"Проверка создания услуги через Postman\",\r\n    \"price\": 1700,\r\n    \"duration_minutes\": 60\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/services",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "services"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Изменить услугу или её статус",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "\r\npm.test(\"Статус ответа — 200\", () => {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Услуга успешно обновлена\", () => {\r\n    const service = pm.response.json();\r\n\r\n    pm.expect(service.id).to.equal(\r\n        Number(pm.collectionVariables.get(\"service_id\"))\r\n    );\r\n\r\n    pm.expect(service.name).to.equal(\"Тестовая услуга Postman\");\r\n    pm.expect(service.description).to.equal(\r\n        \"Проверка изменения услуги через Postman\"\r\n    );\r\n    pm.expect(service.price).to.equal(1750);\r\n    pm.expect(service.duration_minutes).to.equal(65);\r\n    pm.expect(service.status).to.equal(\"active\");\r\n});\r\n\r\npm.test(\"Ответ соответствует структуре API\", () => {\r\n    const service = pm.response.json();\r\n\r\n    pm.expect(service).to.have.all.keys(\r\n        \"id\",\r\n        \"name\",\r\n        \"description\",\r\n        \"price\",\r\n        \"duration_minutes\",\r\n        \"status\"\r\n    );\r\n});\r\n"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\": \"Тестовая услуга Postman\",\r\n    \"description\": \"Проверка изменения услуги через Postman\",\r\n    \"price\": 1750,\r\n    \"duration_minutes\": 65\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/services/{{service_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "services",
+                "{{service_id}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Мастера",
+      "item": [
+        {
+          "name": "Получить список мастеров",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "\r\npm.test(\"Статус ответа — 200\", () => {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Ответ содержит массив мастеров\", () => {\r\n    const masters = pm.response.json();\r\n\r\n    pm.expect(masters).to.be.an(\"array\");\r\n    pm.expect(masters.length).to.be.above(0);\r\n});\r\n\r\npm.test(\"Мастера соответствуют структуре API\", () => {\r\n    const masters = pm.response.json();\r\n\r\n    masters.forEach((master) => {\r\n        pm.expect(master).to.have.all.keys(\r\n            \"id\",\r\n            \"first_name\",\r\n            \"last_name\",\r\n            \"experience\",\r\n            \"description\",\r\n            \"photo_url\",\r\n            \"status\"\r\n        );\r\n\r\n        pm.expect(master.id).to.be.a(\"number\").and.above(0);\r\n        pm.expect(master.first_name).to.be.a(\"string\");\r\n        pm.expect(master.last_name).to.be.a(\"string\");\r\n        pm.expect(master.experience).to.be.a(\"number\").and.at.least(0);\r\n\r\n        pm.expect(\r\n            master.description === null ||\r\n            typeof master.description === \"string\"\r\n        ).to.be.true;\r\n\r\n        pm.expect(\r\n            master.photo_url === null ||\r\n            typeof master.photo_url === \"string\"\r\n        ).to.be.true;\r\n\r\n        pm.expect(master.status).to.equal(\"active\");\r\n    });\r\n});\r\n\r\npm.test(\"Мастера отсортированы по возрастанию ID\", () => {\r\n    const masters = pm.response.json();\r\n\r\n    for (let i = 1; i < masters.length; i++) {\r\n        pm.expect(masters[i].id)\r\n            .to.be.greaterThan(masters[i - 1].id);\r\n    }\r\n});\r\n\r\n// Сохраняем ID первого мастера\r\nconst mastersForVariable = pm.response.json();\r\n\r\nif (mastersForVariable.length > 0) {\r\n    pm.collectionVariables.set(\r\n        \"master_id\",\r\n        String(mastersForVariable[0].id)\r\n    );\r\n} else {\r\n    pm.collectionVariables.unset(\"master_id\");\r\n}\r\n"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/masters",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "masters"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Получить карточку мастера",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "\r\npm.test(\"Статус ответа — 200\", () => {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Получена карточка запрошенного мастера\", () => {\r\n    const master = pm.response.json();\r\n\r\n    pm.expect(master).to.be.an(\"object\");\r\n    pm.expect(master).not.to.be.an(\"array\");\r\n\r\n    pm.expect(master.id).to.equal(\r\n        Number(pm.collectionVariables.get(\"master_id\"))\r\n    );\r\n});\r\n\r\npm.test(\"Карточка соответствует структуре API\", () => {\r\n    const master = pm.response.json();\r\n\r\n    pm.expect(master).to.have.all.keys(\r\n        \"id\",\r\n        \"first_name\",\r\n        \"last_name\",\r\n        \"experience\",\r\n        \"description\",\r\n        \"photo_url\",\r\n        \"status\"\r\n    );\r\n\r\n    pm.expect(master.id).to.be.a(\"number\").and.above(0);\r\n    pm.expect(master.first_name).to.be.a(\"string\");\r\n    pm.expect(master.last_name).to.be.a(\"string\");\r\n    pm.expect(master.experience).to.be.a(\"number\").and.at.least(0);\r\n\r\n    pm.expect(\r\n        master.description === null ||\r\n        typeof master.description === \"string\"\r\n    ).to.be.true;\r\n\r\n    pm.expect(\r\n        master.photo_url === null ||\r\n        typeof master.photo_url === \"string\"\r\n    ).to.be.true;\r\n\r\n    pm.expect(master.status).to.equal(\"active\");\r\n});\r\n\r\npm.test(\"Данные мастера корректны\", () => {\r\n    const master = pm.response.json();\r\n\r\n    pm.expect(master.first_name.trim().length).to.be.above(0);\r\n    pm.expect(master.last_name.trim().length).to.be.above(0);\r\n});\r\n"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/masters/{{master_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "masters",
+                "{{master_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Создать профиль мастера",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "\r\npm.test(\"Статус ответа — 201\", () => {\r\n    pm.response.to.have.status(201);\r\n});\r\n\r\npm.test(\"Профиль мастера успешно создан\", () => {\r\n    const master = pm.response.json();\r\n\r\n    pm.expect(master).to.have.all.keys(\r\n        \"id\",\r\n        \"first_name\",\r\n        \"last_name\",\r\n        \"experience\",\r\n        \"description\",\r\n        \"photo_url\",\r\n        \"status\"\r\n    );\r\n\r\n    pm.expect(master.id).to.be.a(\"number\").and.above(0);\r\n    pm.expect(master.first_name).to.be.a(\"string\");\r\n    pm.expect(master.last_name).to.be.a(\"string\");\r\n    pm.expect(master.experience).to.be.a(\"number\").and.at.least(0);\r\n\r\n    pm.expect(\r\n        master.description === null ||\r\n        typeof master.description === \"string\"\r\n    ).to.be.true;\r\n\r\n    pm.expect(\r\n        master.photo_url === null ||\r\n        typeof master.photo_url === \"string\"\r\n    ).to.be.true;\r\n\r\n    pm.expect(master.status).to.equal(\"active\");\r\n});\r\n\r\npm.test(\"ID созданного профиля корректен\", () => {\r\n    const master = pm.response.json();\r\n\r\n    pm.expect(master.id).to.be.a(\"number\");\r\n    pm.expect(master.id).to.be.above(0);\r\n\r\n    pm.collectionVariables.set(\r\n        \"master_id\",\r\n        String(master.id)\r\n    );\r\n});\r\n"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"user_id\": {{user_id}},\r\n    \"experience\": 2,\r\n    \"description\": \"Тестовый мастер Postman\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/masters",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "masters"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Изменить профиль или статус мастера",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "\r\npm.test(\"Статус ответа — 200\", () => {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Профиль мастера успешно обновлён\", () => {\r\n    const master = pm.response.json();\r\n\r\n    pm.expect(master.id).to.equal(\r\n        Number(pm.collectionVariables.get(\"master_id\"))\r\n    );\r\n\r\n    pm.expect(master.first_name).to.be.a(\"string\");\r\n    pm.expect(master.last_name).to.be.a(\"string\");\r\n    pm.expect(master.experience).to.be.a(\"number\").and.at.least(0);\r\n\r\n    pm.expect(\r\n        master.description === null ||\r\n        typeof master.description === \"string\"\r\n    ).to.be.true;\r\n\r\n    pm.expect(master.status).to.be.oneOf([\"active\", \"inactive\"]);\r\n});\r\n\r\npm.test(\"Ответ соответствует структуре API\", () => {\r\n    const master = pm.response.json();\r\n\r\n    pm.expect(master).to.have.all.keys(\r\n        \"id\",\r\n        \"first_name\",\r\n        \"last_name\",\r\n        \"experience\",\r\n        \"description\",\r\n        \"photo_url\",\r\n        \"status\"\r\n    );\r\n});\r\n"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"experience\": 4,\r\n    \"description\": \"Обновлённый тестовый профиль\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/masters/{{master_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "masters",
+                "{{master_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Получить услуги мастера",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "\r\npm.test(\"Статус ответа — 200\", () => {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Ответ содержит массив услуг мастера\", () => {\r\n    const services = pm.response.json();\r\n\r\n    pm.expect(services).to.be.an(\"array\");\r\n});\r\n\r\npm.test(\"Связи мастера соответствуют структуре API\", () => {\r\n    const services = pm.response.json();\r\n    const masterId = Number(\r\n        pm.collectionVariables.get(\"master_id\")\r\n    );\r\n\r\n    services.forEach((item) => {\r\n        pm.expect(item).to.have.all.keys(\r\n            \"id\",\r\n            \"master_id\",\r\n            \"service_id\",\r\n            \"status\",\r\n            \"service\"\r\n        );\r\n\r\n        pm.expect(item.master_id).to.equal(masterId);\r\n        pm.expect(item.id).to.be.a(\"number\").and.above(0);\r\n        pm.expect(item.service_id).to.be.a(\"number\").and.above(0);\r\n        pm.expect(item.status).to.equal(\"active\");\r\n    });\r\n});\r\n\r\npm.test(\"Вложенная информация об услуге соответствует API\", () => {\r\n    const services = pm.response.json();\r\n\r\n    services.forEach((item) => {\r\n        const service = item.service;\r\n\r\n        pm.expect(service).to.be.an(\"object\");\r\n\r\n        pm.expect(service).to.have.all.keys(\r\n            \"id\",\r\n            \"name\",\r\n            \"description\",\r\n            \"price\",\r\n            \"duration_minutes\",\r\n            \"status\"\r\n        );\r\n\r\n        pm.expect(service.id).to.equal(item.service_id);\r\n        pm.expect(service.name).to.be.a(\"string\");\r\n\r\n        pm.expect(\r\n            service.description === null ||\r\n            typeof service.description === \"string\"\r\n        ).to.be.true;\r\n\r\n        pm.expect(service.price).to.be.a(\"number\").and.at.least(0);\r\n        pm.expect(service.duration_minutes).to.be.above(0);\r\n        pm.expect(service.status).to.equal(\"active\");\r\n    });\r\n});\r\n"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/masters/{{master_id}}/services",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "masters",
+                "{{master_id}}",
+                "services"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Назначить услугу мастеру или изменить статус связи",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "\r\npm.test(\"Статус ответа — 200 или 201\", () => {\r\n    pm.expect(pm.response.code).to.be.oneOf([200, 201]);\r\n});\r\n\r\npm.test(\"Ответ соответствует структуре связи\", () => {\r\n    const link = pm.response.json();\r\n\r\n    pm.expect(link).to.have.all.keys(\r\n        \"id\",\r\n        \"master_id\",\r\n        \"service_id\",\r\n        \"status\"\r\n    );\r\n\r\n    pm.expect(link.id).to.be.a(\"number\").and.above(0);\r\n\r\n    pm.expect(link.master_id).to.equal(\r\n        Number(pm.collectionVariables.get(\"master_id\"))\r\n    );\r\n\r\n    pm.expect(link.service_id).to.equal(\r\n        Number(pm.collectionVariables.get(\"service_id\"))\r\n    );\r\n\r\n    pm.expect(link.status).to.equal(\"active\");\r\n});\r\n\r\npm.test(\"HTTP-код соответствует результату операции\", () => {\r\n    const link = pm.response.json();\r\n\r\n    if (pm.response.code === 201) {\r\n        pm.expect(link.status).to.equal(\"active\");\r\n    }\r\n\r\n    if (pm.response.code === 200) {\r\n        pm.expect(link.status).to.equal(\"active\");\r\n    }\r\n});\r\n"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"status\": \"active\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/masters/{{master_id}}/services/{{service_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "masters",
+                "{{master_id}}",
+                "services",
+                "{{service_id}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
     }
   ],
   "variable": [
@@ -327,11 +721,11 @@
     },
     {
       "key": "client_token",
-      "secret": true
+      "value": ""
     },
     {
       "key": "admin_token",
-      "secret": true
+      "value": ""
     },
     {
       "key": "user_id",
@@ -339,6 +733,14 @@
     },
     {
       "key": "master_token",
+      "value": ""
+    },
+    {
+      "key": "service_id",
+      "value": ""
+    },
+    {
+      "key": "master_id",
       "value": ""
     }
   ]
